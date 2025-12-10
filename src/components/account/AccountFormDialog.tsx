@@ -65,6 +65,7 @@ export const AccountFormDialog: React.FC<AccountFormDialogProps> = ({
     if (!email.trim() || !fullName.trim() || !roleId) return;
 
     if (isEdit && account) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: any = {
         email: email.trim(),
         fullName: fullName.trim(),

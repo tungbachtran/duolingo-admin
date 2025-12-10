@@ -1,9 +1,10 @@
 export enum QuestionType {
-    MATCHING = 'matching',
-    ORDERING = 'ordering',
-    GAP = 'gap',
-    MULTIPLE_CHOICE = 'multiple_choice',
-  }
+  MATCHING = 'matching',
+  ORDERING = 'ordering',
+  GAP = 'gap',
+  MULTIPLE_CHOICE = 'multiple_choice',
+}
+
   
   export interface Question {
     _id: string;
@@ -34,5 +35,6 @@ export enum QuestionType {
     mediaUrl?: string;
   }
   
-  export interface UpdateQuestionDto extends Partial<CreateQuestionDto> {}
+
+  export type UpdateQuestionDto = Partial<CreateQuestionDto>
   

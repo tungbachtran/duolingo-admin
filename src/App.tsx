@@ -14,7 +14,7 @@ import { TheoryList } from './pages/theories/TheoryList';
 import { Toaster } from 'sonner';
 import { RoleManagementPage } from './pages/roles/RoleManagementPage';
 import { AccountManagementPage } from './pages/account/AccountManagementPage';
-import { UserProvider } from './context/user.context';
+
 
 const queryClient = new QueryClient({
   defaultOptions: {

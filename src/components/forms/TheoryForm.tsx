@@ -33,36 +33,44 @@ import { THEORY_TYPES } from '../../utils/constants';
 import { useCourses } from '@/hooks/useCourses';
 
 const baseSchema = z.object({
-  courseId: z.string().min(1, 'Course is required'),
-  unitId: z.string().min(1, 'Unit is required'),
+  courseId: z.string(),
+  unitId: z.string(),
   typeTheory: z.nativeEnum(TheoryType),
   displayOrder: z.number().optional(),
 });
 
 const grammarSchema = baseSchema.extend({
-  title: z.string().min(1, 'Title is required'),
+  typeTheory: z.literal(TheoryType.GRAMMAR),
+  title: z.string(),
   content: z.string().optional(),
   example: z.string().optional(),
 });
 
 const phraseSchema = baseSchema.extend({
-  phraseText: z.string().min(1, 'Phrase text is required'),
+  typeTheory: z.literal(TheoryType.PHRASE),
+  phraseText: z.string(),
   translation: z.string().optional(),
-  audio: z.string().url().optional().or(z.literal('')),
+  audio: z.string().url().optional().or(z.literal("")),
 });
 
 const flashcardSchema = baseSchema.extend({
-  term: z.string().min(1, 'Term is required'),
+  typeTheory: z.literal(TheoryType.FLASHCARD),
+  term: z.string(),
   translation: z.string().optional(),
   ipa: z.string().optional(),
   partOfSpeech: z.string().optional(),
-  audio: z.string().url().optional().or(z.literal('')),
-  image: z.string().url().optional().or(z.literal('')),
+  audio: z.string().url().optional().or(z.literal("")),
+  image: z.string().url().optional().or(z.literal("")),
 });
 
-type TheoryFormValues = z.infer<typeof grammarSchema> | 
-  z.infer<typeof phraseSchema> | 
-  z.infer<typeof flashcardSchema>;
+export const TheorySchema = z.discriminatedUnion("typeTheory", [
+  grammarSchema,
+  phraseSchema,
+  flashcardSchema,
+]);
+
+export type TheoryFormValues = z.infer<typeof TheorySchema>;
+
 
 interface TheoryDialogProps {
   open: boolean;
@@ -70,6 +78,7 @@ interface TheoryDialogProps {
   theory?: Theory | null;
   courseId:string
 }
+
 
 export const TheoryDialog = ({ open, onOpenChange, theory,courseId }: TheoryDialogProps) => {
   const createMutation = useCreateTheory();
@@ -79,21 +88,10 @@ export const TheoryDialog = ({ open, onOpenChange, theory,courseId }: TheoryDial
   const { data: unitsData } = useUnits(selectedCourseId);
   const [selectedType, setSelectedType] = useState<TheoryType>(TheoryType.GRAMMAR);
 
-  const getSchema = (type: TheoryType) => {
-    switch (type) {
-      case TheoryType.GRAMMAR:
-        return grammarSchema;
-      case TheoryType.PHRASE:
-        return phraseSchema;
-      case TheoryType.FLASHCARD:
-        return flashcardSchema;
-      default:
-        return baseSchema;
-    }
-  };
+  
 
   const form = useForm<TheoryFormValues>({
-    resolver: zodResolver(getSchema(selectedType)),
+    resolver: zodResolver(TheorySchema),
     defaultValues: {
       courseId: '',
       unitId: '',
@@ -109,7 +107,7 @@ export const TheoryDialog = ({ open, onOpenChange, theory,courseId }: TheoryDial
       
       const formData: Record<string, unknown> = {
         courseId: courseId|| '',
-        unitId: typeof theory.unitId === 'string' ? theory.unitId : theory.unitId._id,
+        unitId:  theory.unitId ,
         typeTheory: theory.typeTheory,
         displayOrder: theory.displayOrder,
       };
@@ -149,7 +147,7 @@ export const TheoryDialog = ({ open, onOpenChange, theory,courseId }: TheoryDial
   };
 
   const onSubmit = async (data: TheoryFormValues) => {
-    try {
+
       if (theory) {
         await updateMutation.mutateAsync({ id: theory._id, data });
       } else {
@@ -157,9 +155,7 @@ export const TheoryDialog = ({ open, onOpenChange, theory,courseId }: TheoryDial
       }
       onOpenChange(false);
       form.reset();
-    } catch (error) {
-      // Error handled by mutation
-    }
+    
   };
 
   const renderFormFields = () => {

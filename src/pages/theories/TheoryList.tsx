@@ -29,8 +29,7 @@ const getTheoryTypeLabel = (type: TheoryType) => {
 };
 
 export const TheoryList = () => {
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+
   const [search, setSearch] = useState('');
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const [selectedUnitId, setSelectedUnitId] = useState<string>('');
@@ -138,9 +137,7 @@ export const TheoryList = () => {
     },
   ];
 
-  const handlePaginationChange = (newPage: number) => {
-    setPage(newPage);
-  };
+
 
   return (
     <div className="space-y-4">
@@ -191,7 +188,7 @@ export const TheoryList = () => {
         columns={columns}
         data={data?.data || []}
         pagination={data?.pagination}
-        onPaginationChange={handlePaginationChange}
+
         isLoading={isLoading}
       />
 

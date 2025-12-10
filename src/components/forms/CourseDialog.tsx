@@ -72,6 +72,7 @@ export const CourseDialog = ({ open, onOpenChange, course }: CourseDialogProps) 
       }
       onOpenChange(false);
       form.reset();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       // Hiển thị lỗi chi tiết
       toast(error?.response?.data?.message || error?.message || 'Something went wrong');

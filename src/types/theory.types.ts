@@ -39,5 +39,5 @@ export enum TheoryType {
     partOfSpeech?: string;
   }
   
-  export interface UpdateTheoryDto extends Partial<CreateTheoryDto> {}
+  export type UpdateTheoryDto = Partial<CreateTheoryDto>
   

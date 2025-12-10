@@ -1,14 +1,16 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { questionApi } from '../api/question.api';
-import { type CreateQuestionDto, type UpdateQuestionDto } from '../types/question.types';
-import { toast } from './use-toast';
-import { handleApiError } from '../api/client';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { questionApi } from "../api/question.api";
+import {
+  type CreateQuestionDto,
+  type UpdateQuestionDto,
+} from "../types/question.types";
+
+import { handleApiError } from "../api/client";
+import { toast } from "sonner";
 
 export const useQuestions = (lessonId: string) => {
- 
-
   return useQuery({
-    queryKey: ['questions', lessonId],
+    queryKey: ["questions", lessonId],
     queryFn: () => questionApi.getAll(lessonId),
     select: (data) => data.value,
   });
@@ -16,7 +18,7 @@ export const useQuestions = (lessonId: string) => {
 
 export const useQuestion = (id: string) => {
   return useQuery({
-    queryKey: ['question', id],
+    queryKey: ["question", id],
     queryFn: () => questionApi.getById(id),
     select: (data) => data.value,
     enabled: !!id,
@@ -29,18 +31,11 @@ export const useCreateQuestion = () => {
   return useMutation({
     mutationFn: (data: CreateQuestionDto) => questionApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      toast({
-        title: 'Success',
-        description: 'Question created successfully',
-      });
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
+      toast("Question created successfully");
     },
     onError: (error) => {
-      toast({
-        title: 'Error',
-        description: handleApiError(error),
-        variant: 'destructive',
-      });
+      toast(handleApiError(error));
     },
   });
 };
@@ -52,18 +47,11 @@ export const useUpdateQuestion = () => {
     mutationFn: ({ id, data }: { id: string; data: UpdateQuestionDto }) =>
       questionApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      toast({
-        title: 'Success',
-        description: 'Question updated successfully',
-      });
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
+      toast("Question updated successfully");
     },
     onError: (error) => {
-      toast({
-        title: 'Error',
-        description: handleApiError(error),
-        variant: 'destructive',
-      });
+      toast(handleApiError(error));
     },
   });
 };

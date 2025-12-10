@@ -20,8 +20,7 @@ import {
 
 export const UnitList = () => {
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+
   const [search, setSearch] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -99,9 +98,6 @@ export const UnitList = () => {
     },
   ];
 
-  const handlePaginationChange = (newPage: number) => {
-    setPage(newPage);
-  };
 
   // Callback khi tạo/update unit thành công
   const handleUnitSuccess = (courseId: string) => {
@@ -145,7 +141,7 @@ export const UnitList = () => {
         columns={columns}
         data={data?.data || []}
         pagination={data?.pagination}
-        onPaginationChange={handlePaginationChange}
+
         isLoading={isLoading}
       />
 

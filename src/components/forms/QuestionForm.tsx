@@ -35,37 +35,47 @@ import { useCourses } from '@/hooks/useCourses';
 import { useUnits } from '@/hooks/useUnits';
 
 const baseSchema = z.object({
-  lessonId: z.string().min(1, 'Lesson is required'),
+  lessonId: z.string(),
   typeQuestion: z.nativeEnum(QuestionType),
   displayOrder: z.number().optional(),
 });
 
 const matchingSchema = baseSchema.extend({
-  leftText: z.array(z.object({ value: z.string().min(1) })).min(1),
-  rightText: z.array(z.object({ value: z.string().min(1) })).min(1),
+  typeQuestion: z.literal(QuestionType.MATCHING),
+  leftText: z.array(z.object({ value: z.string() })).min(1),
+  rightText: z.array(z.object({ value: z.string() })).min(1),
 });
 
 const orderingSchema = baseSchema.extend({
+  typeQuestion: z.literal(QuestionType.ORDERING),
   fragmentText: z.array(z.string().min(1)).min(1),
   exactFragmentText: z.string().min(1),
 });
 
 const gapSchema = baseSchema.extend({
+  typeQuestion: z.literal(QuestionType.GAP),
   correctAnswer: z.string().min(1),
   mediaUrl: z.string().url().optional().or(z.literal('')),
 });
 
 const multipleChoiceSchema = baseSchema.extend({
+  typeQuestion: z.literal(QuestionType.MULTIPLE_CHOICE),
+  title: z.string().min(1),
   correctAnswer: z.string().min(1),
   answers: z.array(z.string().min(1)).min(2),
   mediaUrl: z.string().url().optional().or(z.literal('')),
-  title: z.string().min(1),
 });
 
-type QuestionFormValues = z.infer<typeof matchingSchema> |
-  z.infer<typeof orderingSchema> |
-  z.infer<typeof gapSchema> |
-  z.infer<typeof multipleChoiceSchema>;
+export const QuestionSchema = z.discriminatedUnion('typeQuestion', [
+  matchingSchema,
+  orderingSchema,
+  gapSchema,
+  multipleChoiceSchema,
+]);
+
+export type QuestionFormValues = z.infer<typeof QuestionSchema>;
+
+
 
 interface QuestionDialogProps {
   open: boolean;
@@ -75,6 +85,7 @@ interface QuestionDialogProps {
   unitId: string;
   lessonId?: string;
 }
+
 
 export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId }: QuestionDialogProps) => {
   const createMutation = useCreateQuestion();
@@ -86,23 +97,11 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
   const { data: coursesData } = useCourses({ page: 1, pageSize: 100 });
   const { data: unitsData } = useUnits(selectedCourse);
   const { data: lessonsData } = useLessons(selectedUnit);
-  const getSchema = (type: QuestionType) => {
-    switch (type) {
-      case QuestionType.MATCHING:
-        return matchingSchema;
-      case QuestionType.ORDERING:
-        return orderingSchema;
-      case QuestionType.GAP:
-        return gapSchema;
-      case QuestionType.MULTIPLE_CHOICE:
-        return multipleChoiceSchema;
-      default:
-        return baseSchema;
-    }
-  };
+  
+
 
   const form = useForm<QuestionFormValues>({
-    resolver: zodResolver(getSchema(selectedType)),
+    resolver: zodResolver(QuestionSchema),
     defaultValues: {
       lessonId: '',
       typeQuestion: QuestionType.MULTIPLE_CHOICE,
@@ -132,7 +131,7 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
   useEffect(() => {
     if (question) {
       setSelectedType(question.typeQuestion);
-      const lessonId = typeof question.lessonId === 'string' ? question.lessonId : question.lessonId._id;
+      const lessonId =  question.lessonId
 
       // Tìm course và unit của lesson này
       const lesson = lessonsData?.data.find(l => l._id === lessonId);
@@ -143,7 +142,7 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
       }
 
       const formData: Record<string, unknown> = {
-        lessonId: typeof question.lessonId === 'string' ? question.lessonId : question.lessonId._id,
+        lessonId:  question.lessonId ,
         typeQuestion: question.typeQuestion,
         displayOrder: question.displayOrder,
       };
@@ -173,7 +172,7 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
   }, [question, form]);
 
   const onSubmit = async (data: QuestionFormValues) => {
-    try {
+
       if (question) {
         await updateMutation.mutateAsync({ id: question._id, data });
       } else {
@@ -181,9 +180,9 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
       }
       onOpenChange(false);
       form.reset();
-    } catch (error) {
+
       // Error handled by mutation
-    }
+
   };
 
   const renderFormFields = () => {
@@ -495,7 +494,7 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
                     <SelectContent>
                       {lessonsData?.data
                         .filter(lesson => {
-                          const lessonUnitId = typeof lesson.unitId === 'string' ? lesson.unitId : lesson.unitId._id;
+                          const lessonUnitId =  lesson.unitId
                           return lessonUnitId === selectedUnit;
                         })
                         .map((lesson) => (

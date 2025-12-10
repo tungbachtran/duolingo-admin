@@ -51,12 +51,7 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
                 header: 'User',
                 cell: ({ row }) => {
                     const account = row.original;
-                    const initials =
-                        account.fullName
-                            ?.split(' ')
-                            .map((w) => w[0])
-                            .join('')
-                            .toUpperCase() || '?';
+        
 
                     return (
                         <div className="flex items-center gap-3">
@@ -92,7 +87,7 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
                     const isActive = row.original.isActive;
                     return (
                         <Badge
-                            variant={isActive ? 'success' : 'secondary'}
+                         
                             className="text-xs"
                         >
                             {isActive ? 'Đang hoạt động' : 'Không hoạt động'}

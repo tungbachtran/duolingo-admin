@@ -64,7 +64,7 @@ export const UnitDialog = ({ open, onOpenChange, unit, onSuccess }: UnitDialogPr
   useEffect(() => {
     if (unit) {
       form.reset({
-        courseId: typeof unit.courseId === 'string' ? unit.courseId : unit.courseId._id,
+        courseId:  unit.courseId ,
         title: unit.title || '',
         description: unit.description || '',
         thumbnail: unit.thumbnail || '',
@@ -80,22 +80,20 @@ export const UnitDialog = ({ open, onOpenChange, unit, onSuccess }: UnitDialogPr
   }, [unit, form]);
 
   const onSubmit = async (data: UnitFormValues) => {
-    try {
+
       if (unit) {
-        const { courseId, ...updateData } = data;
+        const {  ...updateData } = data;
         await updateMutation.mutateAsync({ id: unit._id, data: updateData });
         onSuccess?.(data.courseId); // Gọi callback với courseId
       } else {
         const response = await createMutation.mutateAsync(data);
         // Lấy courseId từ response hoặc từ data
-        const courseId = response?.value?.data?.courseId || data.courseId;
+        const courseId = response?.value?.courseId || data.courseId;
         onSuccess?.(courseId); // Gọi callback với courseId
       }
       onOpenChange(false);
       form.reset();
-    } catch (error) {
-      // Error handled by mutation
-    }
+ 
   };
 
   return (

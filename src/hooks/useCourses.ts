@@ -31,6 +31,7 @@ export const useCreateCourse = () => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       toast.success('Course created successfully');
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const errorMessage = handleApiError(error);
       toast.error(errorMessage);
@@ -49,6 +50,7 @@ export const useUpdateCourse = () => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       toast.success('Course updated successfully');
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const errorMessage = handleApiError(error);
       toast.error(errorMessage);

@@ -1,4 +1,4 @@
-import type { ApiResponse, GetCommonDto, PaginatedResponse } from '@/types/api.types';
+import type { ApiResponse, PaginatedResponse } from '@/types/api.types';
 import { apiClient } from './client';
 import type { CreateQuestionDto, Question, UpdateQuestionDto } from '@/types/question.types';
 

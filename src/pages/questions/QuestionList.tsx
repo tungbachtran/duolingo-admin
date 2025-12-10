@@ -32,8 +32,8 @@ const getQuestionTypeLabel = (type: QuestionType) => {
 
 export const QuestionList = () => {
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+
+
   const [search, setSearch] = useState('');
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const [selectedUnitId, setSelectedUnitId] = useState<string>('');
@@ -139,9 +139,7 @@ export const QuestionList = () => {
     },
   ];
 
-  const handlePaginationChange = (newPage: number) => {
-    setPage(newPage);
-  };
+  
 
   return (
     <div className="space-y-4">
@@ -205,7 +203,7 @@ export const QuestionList = () => {
         columns={columns}
         data={data?.data || []}
         pagination={data?.pagination}
-        onPaginationChange={handlePaginationChange}
+    
         isLoading={isLoading}
       />
 

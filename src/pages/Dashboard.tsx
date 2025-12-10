@@ -12,10 +12,10 @@ import { Button } from '../components/ui/button';
 
 export const Dashboard = () => {
   const { data: coursesData, isLoading: coursesLoading } = useCourses({ page: 1, pageSize: 1 });
-  const { data: unitsData, isLoading: unitsLoading } = useUnits({ page: 1, pageSize: 1 });
-  const { data: lessonsData, isLoading: lessonsLoading } = useLessons({ page: 1, pageSize: 1 });
-  const { data: questionsData, isLoading: questionsLoading } = useQuestions({ page: 1, pageSize: 1 });
-  const { data: theoriesData, isLoading: theoriesLoading } = useTheories({ page: 1, pageSize: 1 });
+  const { data: unitsData, isLoading: unitsLoading } = useUnits('');
+  const { data: lessonsData, isLoading: lessonsLoading } = useLessons('');
+  const { data: questionsData, isLoading: questionsLoading } = useQuestions('');
+  const { data: theoriesData, isLoading: theoriesLoading } = useTheories('');
 
   const stats = [
     {

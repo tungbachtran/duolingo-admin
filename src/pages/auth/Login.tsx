@@ -36,7 +36,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const Login = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -48,7 +48,7 @@ export const Login = () => {
 
   const onSubmit = async (data: LoginFormValues) => {
 
-    try {
+
        await authApi.login(data);
       const res = await userApi.getUserProfile(); // Lấy thông tin user sau khi đăng nhập
       if(!allowedRoles.includes(res.roleId.name)) {
@@ -60,9 +60,7 @@ export const Login = () => {
         
         navigate('/');
      
-    } catch (error) {
-      toast('Error');
-    }
+
   };
 
   return (

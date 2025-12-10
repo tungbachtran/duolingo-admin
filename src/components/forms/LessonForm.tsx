@@ -57,7 +57,7 @@ export const LessonDialog = ({ open, onOpenChange, lesson,courseId }: LessonDial
     if (lesson) {
       setFormData({
         courseId: courseId,
-        unitId: typeof lesson.unitId === 'string' ? lesson.unitId : lesson.unitId._id,
+        unitId: lesson.unitId ,
         title: lesson.title || '',
         experiencePoint: lesson.experiencePoint || 0,
         objectives: lesson.objectives || '',
@@ -75,6 +75,7 @@ export const LessonDialog = ({ open, onOpenChange, lesson,courseId }: LessonDial
     }
   }, [lesson, open]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleInputChange = (field: keyof FormData, value: any) => {
     if (field === 'experiencePoint') {
       setFormData(prev => ({
@@ -107,10 +108,10 @@ export const LessonDialog = ({ open, onOpenChange, lesson,courseId }: LessonDial
 
     try {
       if (lesson) {
-        const { courseId, ...updateData } = formData;
+        const {  ...updateData } = formData;
         await updateMutation.mutateAsync({ id: lesson._id, data: updateData });
       } else {
-        const { courseId, ...createData } = formData;
+        const {  ...createData } = formData;
         await createMutation.mutateAsync(createData);
       }
       onOpenChange(false);

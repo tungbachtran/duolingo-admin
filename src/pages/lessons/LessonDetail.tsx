@@ -98,6 +98,7 @@ export const LessonDetail = () => {
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
         lesson={lesson}
+        courseId=''
       />
     </div>
   );

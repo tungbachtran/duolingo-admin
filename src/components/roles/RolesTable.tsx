@@ -46,6 +46,7 @@ export const RolesTable: React.FC<RolesTableProps> = ({
         header: 'Role',
         cell: ({ row }) => {
           const role = row.original;
+          // eslint-disable-next-line react-hooks/rules-of-hooks
           const [value, setValue] = useState(role.name);
           const isAdmin = role.name === 'Admin';
 

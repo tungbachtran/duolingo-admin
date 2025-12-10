@@ -1,7 +1,7 @@
 import { userApi } from "@/api/user.api";
 import type { User } from "@/types/user.types";
 import { useQuery } from "@tanstack/react-query";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext} from "react";
 
 interface UserContextType {
     user: User | undefined;
