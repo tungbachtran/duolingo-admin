@@ -1,0 +1,1 @@
+export const allowedRoles = ['Admin', 'Teacher','Teacher3'];
