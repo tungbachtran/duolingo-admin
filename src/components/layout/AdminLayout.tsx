@@ -26,7 +26,7 @@ export const AdminLayout = () => {
 
   if (data && !allowedRoles.includes(data.roleId.name)) {
     navigate('/login');
-    toast('Access denied. You do not have admin privileges.');
+    toast('Truy cập bị từ chối. Bạn không có quyền');
     return;
   }
 
