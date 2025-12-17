@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -29,6 +29,7 @@ import {
 import { useCreateUnit, useUpdateUnit } from '../../hooks/useUnits';
 import { useCourses } from '../../hooks/useCourses';
 import { type Unit } from '../../api/unit.api';
+import { uploadImageAndGetUrl } from '@/api/upload.api';
 
 const unitSchema = z.object({
   courseId: z.string().min(1, 'Course is required'),
@@ -50,7 +51,19 @@ export const UnitDialog = ({ open, onOpenChange, unit, onSuccess }: UnitDialogPr
   const createMutation = useCreateUnit();
   const updateMutation = useUpdateUnit();
   const { data: coursesData } = useCourses({ page: 1, pageSize: 100 });
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
 
+  useEffect(() => {
+    setThumbnailPreview(unit?.thumbnail || '');
+    setThumbnailFile(null);
+  }, [unit, open]);
+
+  useEffect(() => {
+    return () => {
+      if (thumbnailPreview?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview);
+    };
+  }, [thumbnailPreview]);
   const form = useForm<UnitFormValues>({
     resolver: zodResolver(unitSchema),
     defaultValues: {
@@ -64,7 +77,7 @@ export const UnitDialog = ({ open, onOpenChange, unit, onSuccess }: UnitDialogPr
   useEffect(() => {
     if (unit) {
       form.reset({
-        courseId:  unit.courseId ,
+        courseId: unit.courseId,
         title: unit.title || '',
         description: unit.description || '',
         thumbnail: unit.thumbnail || '',
@@ -80,20 +93,26 @@ export const UnitDialog = ({ open, onOpenChange, unit, onSuccess }: UnitDialogPr
   }, [unit, form]);
 
   const onSubmit = async (data: UnitFormValues) => {
+    const payload = { ...data };
 
-      if (unit) {
-        const {  ...updateData } = data;
-        await updateMutation.mutateAsync({ id: unit._id, data: updateData });
-        onSuccess?.(data.courseId); // Gọi callback với courseId
-      } else {
-        const response = await createMutation.mutateAsync(data);
-        // Lấy courseId từ response hoặc từ data
-        const courseId = response?.value?.courseId || data.courseId;
-        onSuccess?.(courseId); // Gọi callback với courseId
-      }
-      onOpenChange(false);
-      form.reset();
- 
+    if (thumbnailFile) {
+      const url = await uploadImageAndGetUrl(thumbnailFile);
+      payload.thumbnail = url;
+    }
+    if (unit) {
+
+      await updateMutation.mutateAsync({ id: unit._id, data: payload });
+      onSuccess?.(data.courseId); // Gọi callback với courseId
+    } else {
+      const response = await createMutation.mutateAsync(payload);
+      // Lấy courseId từ response hoặc từ data
+      const courseId = response?.value?.courseId || data.courseId;
+      onSuccess?.(courseId); // Gọi callback với courseId
+    }
+    onOpenChange(false);
+    form.reset();
+    setThumbnailFile(null);
+
   };
 
   return (
@@ -161,11 +180,29 @@ export const UnitDialog = ({ open, onOpenChange, unit, onSuccess }: UnitDialogPr
             <FormField
               control={form.control}
               name="thumbnail"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
-                  <FormLabel>Thumbnail URL</FormLabel>
+                  <FormLabel>Thumbnail File</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://..." {...field} />
+                    <>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0] || null;
+                          setThumbnailFile(f);
+
+                          if (thumbnailPreview?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview);
+                          setThumbnailPreview(f ? URL.createObjectURL(f) : (unit?.thumbnail || ''));
+                        }}
+                      />
+                      {thumbnailPreview ? (
+                        <img
+                          src={thumbnailPreview}
+                          alt="thumbnail preview"
+                          className="w-full max-w-[280px] rounded border"
+                        />
+                      ) : null}</>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/select';
 
 import { useRoleOptions } from '@/hooks/useRoles';
-import {type Account } from '@/types/account';
+import { type Account } from '@/types/account';
 import { useCreateAccount, useUpdateAccount } from '@/hooks/useAccounts';
+import { uploadImageAndGetUrl } from '@/api/upload.api';
 
 interface AccountFormDialogProps {
   open: boolean;
@@ -35,7 +36,21 @@ export const AccountFormDialog: React.FC<AccountFormDialogProps> = ({
   const [avatarImage, setAvatarImage] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [roleId, setRoleId] = React.useState<string>('');
+  const [thumbnailFile, setThumbnailFile] = React.useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = React.useState<string>('');
 
+  React.useEffect(() => {
+
+    setThumbnailPreview(account?.avatarImage || '');
+    setThumbnailFile(null);
+  }, [account]);
+
+  React.useEffect(() => {
+    return () => {
+      // cleanup objectURL nếu có
+      if (thumbnailPreview?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview);
+    };
+  }, [thumbnailPreview]);
   const createMutation = useCreateAccount();
   const updateMutation = useUpdateAccount();
 
@@ -82,12 +97,16 @@ export const AccountFormDialog: React.FC<AccountFormDialogProps> = ({
       });
     } else {
       if (!password.trim()) return;
+      let url = ''
+      if (thumbnailFile) {
+        url = await uploadImageAndGetUrl(thumbnailFile);
+      }
       await createMutation.mutateAsync({
         email: email.trim(),
         fullName: fullName.trim(),
         roleId,
         password: password.trim(),
-        avatarImage: avatarImage.trim() || undefined,
+        avatarImage: url || undefined,
       });
     }
 
@@ -131,13 +150,25 @@ export const AccountFormDialog: React.FC<AccountFormDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label>Avatar URL</Label>
+            <Label>Avatar</Label>
             <Input
-              placeholder="https://..."
-              value={avatarImage}
-              onChange={(e) => setAvatarImage(e.target.value)}
-              disabled={isSubmitting}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const f = e.target.files?.[0] || null;
+                setThumbnailFile(f);
+
+                if (thumbnailPreview?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview);
+                setThumbnailPreview(f ? URL.createObjectURL(f) : (account?.avatarImage || ''));
+              }}
             />
+            {thumbnailPreview ? (
+              <img
+                src={thumbnailPreview}
+                alt="thumbnail preview"
+                className="w-full max-w-[280px] rounded border"
+              />
+            ) : null}
           </div>
 
           <div className="space-y-2">

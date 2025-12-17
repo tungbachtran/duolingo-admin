@@ -33,6 +33,7 @@ import { QUESTION_TYPES } from '../../utils/constants';
 import { X, Plus } from 'lucide-react';
 import { useCourses } from '@/hooks/useCourses';
 import { useUnits } from '@/hooks/useUnits';
+import { uploadImageAndGetUrl } from '@/api/upload.api';
 
 const baseSchema = z.object({
   lessonId: z.string(),
@@ -97,7 +98,20 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
   const { data: coursesData } = useCourses({ page: 1, pageSize: 100 });
   const { data: unitsData } = useUnits(selectedCourse);
   const { data: lessonsData } = useLessons(selectedUnit);
-  
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string>('');
+
+  useEffect(() => {
+    const url = question?.mediaUrl || '';
+    setMediaPreview(url);
+    setMediaFile(null);
+  }, [question, open]);
+
+  useEffect(() => {
+    return () => {
+      if (mediaPreview?.startsWith('blob:')) URL.revokeObjectURL(mediaPreview);
+    };
+  }, [mediaPreview]);
 
 
   const form = useForm<QuestionFormValues>({
@@ -131,7 +145,7 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
   useEffect(() => {
     if (question) {
       setSelectedType(question.typeQuestion);
-      const lessonId =  question.lessonId
+      const lessonId = question.lessonId
 
       // Tìm course và unit của lesson này
       const lesson = lessonsData?.data.find(l => l._id === lessonId);
@@ -142,7 +156,7 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
       }
 
       const formData: Record<string, unknown> = {
-        lessonId:  question.lessonId ,
+        lessonId: question.lessonId,
         typeQuestion: question.typeQuestion,
         displayOrder: question.displayOrder,
       };
@@ -172,16 +186,21 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
   }, [question, form]);
 
   const onSubmit = async (data: QuestionFormValues) => {
+    let payload: QuestionFormValues = data;
 
-      if (question) {
-        await updateMutation.mutateAsync({ id: question._id, data });
-      } else {
-        await createMutation.mutateAsync(data);
-      }
-      onOpenChange(false);
-      form.reset();
+    if ('mediaUrl' in payload && mediaFile) {
+      const url = await uploadImageAndGetUrl(mediaFile);
+      payload = { ...payload, mediaUrl: url } as QuestionFormValues;
+    }
+    if (question) {
+      await updateMutation.mutateAsync({ id: question._id, data: payload });
+    } else {
+      await createMutation.mutateAsync(payload);
+    }
+    onOpenChange(false);
+    form.reset();
+    setMediaFile(null);
 
-      // Error handled by mutation
 
   };
 
@@ -321,11 +340,25 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
             <FormField
               control={form.control}
               name="mediaUrl"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
-                  <FormLabel>Media URL</FormLabel>
+                  <FormLabel>Media File</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://..." {...field} />
+                    <>
+                      <Input
+                        type="file"
+                        accept="image/*,audio/*"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0] || null;
+                          setMediaFile(f);
+
+                          if (mediaPreview?.startsWith('blob:')) URL.revokeObjectURL(mediaPreview);
+                          setMediaPreview(f ? URL.createObjectURL(f) : (question?.mediaUrl || ''));
+                        }}
+                      />
+                      {mediaPreview ? (
+                        <img src={mediaPreview} alt="media preview" className="w-full max-w-[280px] rounded border" />
+                      ) : null}</>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -397,11 +430,25 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
             <FormField
               control={form.control}
               name="mediaUrl"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
-                  <FormLabel>Media URL</FormLabel>
+                  <FormLabel>Media File</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://..." {...field} />
+                    <>
+                      <Input
+                        type="file"
+                        accept="image/*,audio/*"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0] || null;
+                          setMediaFile(f);
+
+                          if (mediaPreview?.startsWith('blob:')) URL.revokeObjectURL(mediaPreview);
+                          setMediaPreview(f ? URL.createObjectURL(f) : (question?.mediaUrl || ''));
+                        }}
+                      />
+                      {mediaPreview ? (
+                        <img src={mediaPreview} alt="media preview" className="w-full max-w-[280px] rounded border" />
+                      ) : null}</>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -494,7 +541,7 @@ export const QuestionDialog = ({ open, onOpenChange, question, unitId, courseId 
                     <SelectContent>
                       {lessonsData?.data
                         .filter(lesson => {
-                          const lessonUnitId =  lesson.unitId
+                          const lessonUnitId = lesson.unitId
                           return lessonUnitId === selectedUnit;
                         })
                         .map((lesson) => (

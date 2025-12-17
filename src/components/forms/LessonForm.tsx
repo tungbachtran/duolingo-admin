@@ -20,12 +20,13 @@ import { useCreateLesson, useUpdateLesson } from '../../hooks/useLessons';
 import { useUnits } from '../../hooks/useUnits';
 import { type Lesson } from '../../types/course.types';
 import { useCourses } from '@/hooks/useCourses';
+import { uploadImageAndGetUrl } from '@/api/upload.api';
 
 interface LessonDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   lesson?: Lesson | null;
-  courseId:string
+  courseId: string
 }
 
 interface FormData {
@@ -37,10 +38,26 @@ interface FormData {
   thumbnail: string;
 }
 
-export const LessonDialog = ({ open, onOpenChange, lesson,courseId }: LessonDialogProps) => {
+export const LessonDialog = ({ open, onOpenChange, lesson, courseId }: LessonDialogProps) => {
   const createMutation = useCreateLesson();
   const updateMutation = useUpdateLesson();
-  
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
+
+  useEffect(() => {
+    if (lesson) {
+      setThumbnailPreview(lesson.thumbnail || '');
+    } else {
+      setThumbnailPreview('');
+    }
+    setThumbnailFile(null);
+  }, [lesson, open]);
+
+  useEffect(() => {
+    return () => {
+      if (thumbnailPreview?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview);
+    };
+  }, [thumbnailPreview]);
   const [formData, setFormData] = useState<FormData>({
     courseId: '',
     unitId: '',
@@ -57,7 +74,7 @@ export const LessonDialog = ({ open, onOpenChange, lesson,courseId }: LessonDial
     if (lesson) {
       setFormData({
         courseId: courseId,
-        unitId: lesson.unitId ,
+        unitId: lesson.unitId,
         title: lesson.title || '',
         experiencePoint: lesson.experiencePoint || 0,
         objectives: lesson.objectives || '',
@@ -100,19 +117,25 @@ export const LessonDialog = ({ open, onOpenChange, lesson,courseId }: LessonDial
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.unitId) {
       alert('Please select a unit');
       return;
     }
 
     try {
+      const payload = { ...formData };
+
+      if (thumbnailFile) {
+        const url = await uploadImageAndGetUrl(thumbnailFile);
+        payload.thumbnail = url;
+      }
       if (lesson) {
-        const {  ...updateData } = formData;
-        await updateMutation.mutateAsync({ id: lesson._id, data: updateData });
+
+        await updateMutation.mutateAsync({ id: lesson._id, data: payload });
       } else {
-        const {  ...createData } = formData;
-        await createMutation.mutateAsync(createData);
+
+        await createMutation.mutateAsync(payload);
       }
       onOpenChange(false);
       setFormData({
@@ -169,8 +192,8 @@ export const LessonDialog = ({ open, onOpenChange, lesson,courseId }: LessonDial
 
           <div>
             <label className="text-sm font-medium">Title</label>
-            <Input 
-              placeholder="Lesson title" 
+            <Input
+              placeholder="Lesson title"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
             />
@@ -189,20 +212,29 @@ export const LessonDialog = ({ open, onOpenChange, lesson,courseId }: LessonDial
 
           <div>
             <label className="text-sm font-medium">Objectives</label>
-            <Textarea 
-              placeholder="Lesson objectives" 
+            <Textarea
+              placeholder="Lesson objectives"
               value={formData.objectives}
               onChange={(e) => handleInputChange('objectives', e.target.value)}
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium">Thumbnail URL</label>
-            <Input 
-              placeholder="https://..." 
-              value={formData.thumbnail}
-              onChange={(e) => handleInputChange('thumbnail', e.target.value)}
+            <label className="text-sm font-medium">Thumbnail File</label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const f = e.target.files?.[0] || null;
+                setThumbnailFile(f);
+
+                if (thumbnailPreview?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview);
+                setThumbnailPreview(f ? URL.createObjectURL(f) : (lesson?.thumbnail || ''));
+              }}
             />
+            {thumbnailPreview ? (
+              <img src={thumbnailPreview} alt="thumbnail preview" className="w-full max-w-[280px] rounded border" />
+            ) : null}
           </div>
 
           <div className="flex justify-end gap-2">

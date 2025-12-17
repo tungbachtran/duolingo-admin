@@ -31,6 +31,7 @@ import { useUnits } from '../../hooks/useUnits';
 import { type Theory, TheoryType } from '../../types/theory.types';
 import { THEORY_TYPES } from '../../utils/constants';
 import { useCourses } from '@/hooks/useCourses';
+import { uploadImageAndGetUrl } from '@/api/upload.api';
 
 const baseSchema = z.object({
   courseId: z.string(),
@@ -76,19 +77,34 @@ interface TheoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   theory?: Theory | null;
-  courseId:string
+  courseId: string
 }
 
 
-export const TheoryDialog = ({ open, onOpenChange, theory,courseId }: TheoryDialogProps) => {
+export const TheoryDialog = ({ open, onOpenChange, theory, courseId }: TheoryDialogProps) => {
   const createMutation = useCreateTheory();
   const updateMutation = useUpdateTheory();
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const { data: coursesData } = useCourses({ page: 1, pageSize: 100 });
   const { data: unitsData } = useUnits(selectedCourseId);
   const [selectedType, setSelectedType] = useState<TheoryType>(TheoryType.GRAMMAR);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
 
-  
+  useEffect(() => {
+    // show preview theo url cũ nếu là flashcard
+    const url = theory?.typeTheory === TheoryType.FLASHCARD ? (theory.image || '') : '';
+    setImagePreview(url);
+    setImageFile(null);
+  }, [theory, open]);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
+
 
   const form = useForm<TheoryFormValues>({
     resolver: zodResolver(TheorySchema),
@@ -102,12 +118,12 @@ export const TheoryDialog = ({ open, onOpenChange, theory,courseId }: TheoryDial
   useEffect(() => {
     if (theory) {
       setSelectedType(theory.typeTheory);
-      
+
       setSelectedCourseId(courseId);
-      
+
       const formData: Record<string, unknown> = {
-        courseId: courseId|| '',
-        unitId:  theory.unitId ,
+        courseId: courseId || '',
+        unitId: theory.unitId,
         typeTheory: theory.typeTheory,
         displayOrder: theory.displayOrder,
       };
@@ -147,15 +163,21 @@ export const TheoryDialog = ({ open, onOpenChange, theory,courseId }: TheoryDial
   };
 
   const onSubmit = async (data: TheoryFormValues) => {
+    let payload: TheoryFormValues = data;
 
-      if (theory) {
-        await updateMutation.mutateAsync({ id: theory._id, data });
-      } else {
-        await createMutation.mutateAsync(data);
-      }
-      onOpenChange(false);
-      form.reset();
-    
+    if (payload.typeTheory === TheoryType.FLASHCARD && imageFile && audioFile) {
+      const url = await uploadImageAndGetUrl(imageFile);
+      const audioUrl = await uploadImageAndGetUrl(audioFile);
+      payload = { ...payload, image: url, audio: audioUrl };
+    }
+    if (theory) {
+      await updateMutation.mutateAsync({ id: theory._id, data: payload });
+    } else {
+      await createMutation.mutateAsync(payload);
+    }
+    onOpenChange(false);
+    form.reset();
+    setImageFile(null);
   };
 
   const renderFormFields = () => {
@@ -308,11 +330,21 @@ export const TheoryDialog = ({ open, onOpenChange, theory,courseId }: TheoryDial
             <FormField
               control={form.control}
               name="audio"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
-                  <FormLabel>Audio URL</FormLabel>
+                  <FormLabel>Audio File</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://..." {...field} />
+                    <Input
+                      type="file"
+                      accept="audio/*"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] || null;
+                        setAudioFile(f);
+
+
+                      }}
+                    />
+
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -321,11 +353,25 @@ export const TheoryDialog = ({ open, onOpenChange, theory,courseId }: TheoryDial
             <FormField
               control={form.control}
               name="image"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
-                  <FormLabel>Image URL</FormLabel>
+                  <FormLabel>Image File</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://..." {...field} />
+                    <>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0] || null;
+                          setImageFile(f);
+
+                          if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
+                          setImagePreview(f ? URL.createObjectURL(f) : (theory?.image || ''));
+                        }}
+                      />
+                      {imagePreview ? (
+                        <img src={imagePreview} alt="image preview" className="w-full max-w-[280px] rounded border" />
+                      ) : null}</>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

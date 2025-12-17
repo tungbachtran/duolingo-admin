@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -21,6 +21,7 @@ import { Button } from '../ui/button';
 import { useCreateCourse, useUpdateCourse } from '../../hooks/useCourses';
 import { type Course } from '../../types/course.types';
 import { toast } from 'sonner'; // Import toast
+import { uploadImageAndGetUrl } from '@/api/upload.api';
 
 const courseSchema = z.object({
   description: z.string().min(1, 'Description is required'), // Thêm validation
@@ -38,7 +39,21 @@ interface CourseDialogProps {
 export const CourseDialog = ({ open, onOpenChange, course }: CourseDialogProps) => {
   const createMutation = useCreateCourse();
   const updateMutation = useUpdateCourse();
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
 
+  useEffect(() => {
+    // preview theo url cũ khi edit
+    setThumbnailPreview(course?.thumbnail || '');
+    setThumbnailFile(null);
+  }, [course, open]);
+
+  useEffect(() => {
+    return () => {
+      // cleanup objectURL nếu có
+      if (thumbnailPreview?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview);
+    };
+  }, [thumbnailPreview]);
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseSchema),
     defaultValues: {
@@ -63,16 +78,24 @@ export const CourseDialog = ({ open, onOpenChange, course }: CourseDialogProps) 
 
   const onSubmit = async (data: CourseFormValues) => {
     try {
+      const payload = { ...data };
+
+      if (thumbnailFile) {
+        const url = await uploadImageAndGetUrl(thumbnailFile);
+        payload.thumbnail = url;
+      }
+      console.log(payload)
       if (course) {
-        await updateMutation.mutateAsync({ id: course._id, data });
+        await updateMutation.mutateAsync({ id: course._id, data: payload });
         toast('Course updated successfully');
       } else {
-        await createMutation.mutateAsync(data);
+        await createMutation.mutateAsync(payload);
         toast('Course created successfully');
       }
       onOpenChange(false);
       form.reset();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setThumbnailFile(null);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       // Hiển thị lỗi chi tiết
       toast(error?.response?.data?.message || error?.message || 'Something went wrong');
@@ -104,11 +127,29 @@ export const CourseDialog = ({ open, onOpenChange, course }: CourseDialogProps) 
             <FormField
               control={form.control}
               name="thumbnail"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
-                  <FormLabel>Thumbnail URL</FormLabel>
+                  <FormLabel>Thumbnail File</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://..." {...field} />
+                    <>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0] || null;
+                          setThumbnailFile(f);
+
+                          if (thumbnailPreview?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview);
+                          setThumbnailPreview(f ? URL.createObjectURL(f) : (course?.thumbnail || ''));
+                        }}
+                      />
+                      {thumbnailPreview ? (
+                        <img
+                          src={thumbnailPreview}
+                          alt="thumbnail preview"
+                          className="w-full max-w-[280px] rounded border"
+                        />
+                      ) : null}</>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -127,8 +168,8 @@ export const CourseDialog = ({ open, onOpenChange, course }: CourseDialogProps) 
                 className='text-black'
                 disabled={createMutation.isPending || updateMutation.isPending}
               >
-                {createMutation.isPending || updateMutation.isPending 
-                  ? 'Loading...' 
+                {createMutation.isPending || updateMutation.isPending
+                  ? 'Loading...'
                   : course ? 'Update' : 'Create'
                 }
               </Button>
