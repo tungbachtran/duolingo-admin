@@ -10,7 +10,7 @@ import { Spinner } from '@/components/ui/spinner';
 
 export const AdminLayout = () => {
   const navigate = useNavigate();
-  const { data, isFetching } = useQuery({ queryKey: ['userProfile'], queryFn: userApi.getUserProfile })
+  const { data, isFetching } = useQuery({ queryKey: ['userProfile'], queryFn: userApi.getUserProfile,gcTime:0 })
   if (isFetching) {
     return (
       <>

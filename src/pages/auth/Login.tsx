@@ -50,7 +50,7 @@ export const Login = () => {
 
 
        await authApi.login(data);
-      const res = await userApi.getUserProfile(); // Lấy thông tin user sau khi đăng nhập
+      const res = await userApi.getUserProfile(); 
       if(!allowedRoles.includes(res.roleId.name)) {
         navigate('/login');
         toast('Access denied. You do not have admin privileges.');
