@@ -256,29 +256,7 @@ export const TheoryDialog = ({ open, onOpenChange, theory, courseId }: TheoryDia
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="audio"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Audio File</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="audio/*"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0] || null;
-                        setAudioFile(f);
-
-
-                      }}
-                    />
-
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            
           </>
         );
 
