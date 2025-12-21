@@ -48,30 +48,30 @@ export const AccountManagementPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Quản lý tài khoản</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Account management</h1>
 
         </div>
         <div className="flex items-center gap-2">
           {isFetching && !isLoading && (
             <span className="flex items-center text-xs text-muted-foreground">
               <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-              Đang cập nhật...
+              Updating...
             </span>
           )}
-          {user?.roleId.permissions.includes('account.create') && (<Button className='text-black border-2 border-black' onClick={handleCreate}>Tạo tài khoản</Button>)}
+          {user?.roleId.permissions.includes('account.create') && (<Button className='text-black border-2 border-black' onClick={handleCreate}>Create a new account</Button>)}
         </div>
       </div>
 
       {isLoading && (
         <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Đang tải danh sách tài khoản...
+          Loading account lists...
         </div>
       )}
 
       {isError && (
         <div className="text-sm text-red-500">
-          Lỗi khi tải accounts. Vui lòng Kiểm tra API <code>/api/accounts</code>.
+          Cannot get accounts
         </div>
       )}
 
@@ -82,8 +82,8 @@ export const AccountManagementPage: React.FC = () => {
           {pagination && (
             <div className="flex items-center justify-between pt-4 text-xs text-muted-foreground">
               <div>
-                Trang {pagination.page} / {pagination.totalPages}
-                {' • '}Tổng {pagination.totalRecords} tài khoản
+                Page {pagination.page} / {pagination.totalPages}
+                {' • '}Total {pagination.totalRecords} accounts
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -94,7 +94,7 @@ export const AccountManagementPage: React.FC = () => {
                     if (canPrev) setPage((p) => p - 1);
                   }}
                 >
-                  Trước
+                  Previous
                 </Button>
                 <Button
                   variant="outline"
@@ -104,7 +104,7 @@ export const AccountManagementPage: React.FC = () => {
                     if (canNext) setPage((p) => p + 1);
                   }}
                 >
-                  Sau
+                  Next
                 </Button>
               </div>
             </div>

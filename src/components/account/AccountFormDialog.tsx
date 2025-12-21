@@ -113,7 +113,7 @@ export const AccountFormDialog: React.FC<AccountFormDialogProps> = ({
     onOpenChange(false);
   };
 
-  const title = isEdit ? 'Chỉnh sửa tài khoản' : 'Tạo tài khoản mới';
+  const title = isEdit ? 'Edit account' : 'Create a new account';
 
   return (
     <Dialog
@@ -140,9 +140,9 @@ export const AccountFormDialog: React.FC<AccountFormDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label>Họ tên</Label>
+            <Label>Full name</Label>
             <Input
-              placeholder="Tên đầy đủ"
+              placeholder="Full name"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               disabled={isSubmitting}
@@ -179,7 +179,7 @@ export const AccountFormDialog: React.FC<AccountFormDialogProps> = ({
               disabled={isSubmitting || !roleOptions}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Chọn role" />
+                <SelectValue placeholder="Choose role" />
               </SelectTrigger>
               <SelectContent>
                 {roleOptions?.map((role) => (
@@ -193,11 +193,11 @@ export const AccountFormDialog: React.FC<AccountFormDialogProps> = ({
 
           <div className="space-y-2">
             <Label>
-              {isEdit ? 'Mật khẩu (để trống nếu không đổi)' : 'Mật khẩu'}
+              {isEdit ? 'Password (empty if not change)' : 'Password'}
             </Label>
             <Input
               type="password"
-              placeholder={isEdit ? 'Để trống nếu không đổi' : 'Nhập mật khẩu'}
+              placeholder={isEdit ? 'Empty if not change' : 'Type password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isSubmitting}
@@ -207,7 +207,7 @@ export const AccountFormDialog: React.FC<AccountFormDialogProps> = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-            Hủy
+            Cancel
           </Button>
           <Button
             onClick={handleSubmit}
@@ -220,7 +220,7 @@ export const AccountFormDialog: React.FC<AccountFormDialogProps> = ({
               (!isEdit && !password.trim())
             }
           >
-            {isSubmitting ? 'Đang lưu...' : 'Lưu'}
+            {isSubmitting ? 'Saving...' : 'Save'}
           </Button>
         </DialogFooter>
       </DialogContent>

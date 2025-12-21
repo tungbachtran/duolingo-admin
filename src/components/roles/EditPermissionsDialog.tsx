@@ -32,21 +32,17 @@ export const EditPermissionsDialog: React.FC<EditPermissionsDialogProps> = ({
     onChangePermissions(role._id, nextPermissions);
   };
 
-  const isAdmin = role.name === 'Admin';
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Permissions của role: {role.name}</DialogTitle>
+          <DialogTitle>Permissions of role: {role.name}</DialogTitle>
         </DialogHeader>
         <Separator />
         <div className="mt-4">
-          {isAdmin && (
-            <p className="text-xs text-muted-foreground mb-2">
-              Role <span className="font-semibold">Admin</span> thường nên có full quyền, cẩn thận khi tắt bớt.
-            </p>
-          )}
+
           <ScrollArea className="h-72 rounded border p-2">
             <div className="space-y-2">
               {allPermissions.map((permission) => {
@@ -58,7 +54,7 @@ export const EditPermissionsDialog: React.FC<EditPermissionsDialogProps> = ({
                   >
                     <input
                       type='checkbox'
-                      
+
                       checked={checked}
                       onChange={() => handleTogglePermission(permission)}
                       className='w-5 h-5'
@@ -69,7 +65,7 @@ export const EditPermissionsDialog: React.FC<EditPermissionsDialogProps> = ({
               })}
               {allPermissions.length === 0 && (
                 <p className="text-xs text-muted-foreground">
-                  Chưa có permission nào. Bạn nên kiểm tra lại dữ liệu từ API /roles.
+                  Can not get permissons
                 </p>
               )}
             </div>
@@ -77,7 +73,7 @@ export const EditPermissionsDialog: React.FC<EditPermissionsDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Đóng
+            Close
           </Button>
         </DialogFooter>
       </DialogContent>

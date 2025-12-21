@@ -28,10 +28,10 @@ export const UnitList = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
 
-  // Fetch courses for filter
+ 
   const { data: coursesData } = useCourses({ page: 1, pageSize: 100 });
   const { data: user } = useQuery({ queryKey: ['userProfile'], queryFn: userApi.getUserProfile, gcTime: 0 })
-  // Set default course on load
+ 
   useEffect(() => {
     if (coursesData?.data && coursesData.data.length > 0 && !selectedCourseId) {
       setSelectedCourseId(coursesData.data[0]._id);
@@ -103,9 +103,9 @@ export const UnitList = () => {
   ];
 
 
-  // Callback khi tạo/update unit thành công
+
   const handleUnitSuccess = (courseId: string) => {
-    // Chuyển về course vừa tạo/update unit
+
     setSelectedCourseId(courseId);
   };
 

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 
 
@@ -30,7 +30,7 @@ interface RolesTableProps {
   onChangeRoleName: (id: string, name: string) => void;
   onDeleteRole: (id: string) => void;
   onOpenEditPermissions: (role: Role) => void;
-  user?:User
+  user?: User
 }
 
 export const RolesTable: React.FC<RolesTableProps> = ({
@@ -100,11 +100,11 @@ export const RolesTable: React.FC<RolesTableProps> = ({
               ))}
               {extra > 0 && (
                 <Badge variant="outline" className="text-[10px]">
-                  +{extra} nữa
+                  +{extra} more
                 </Badge>
               )}
               {count === 0 && (
-                <span className="text-xs text-muted-foreground">Không có permission</span>
+                <span className="text-xs text-muted-foreground">No permission</span>
               )}
             </div>
           );
@@ -128,20 +128,20 @@ export const RolesTable: React.FC<RolesTableProps> = ({
                 <DropdownMenuContent align="end">
                   {user?.roleId.permissions.includes('role.setup') && (
                     <DropdownMenuItem onClick={() => onOpenEditPermissions(role)}>
-                    Chỉnh sửa permissions
-                  </DropdownMenuItem>
+                      Edit permissions
+                    </DropdownMenuItem>
                   )}
                   {user?.roleId.permissions.includes('role.delete') && (
                     <DropdownMenuItem
-                    disabled={isAdmin}
-                    className={isAdmin ? 'cursor-not-allowed opacity-60' : ''}
-                    onClick={() => {
-                      if (isAdmin) return;
-                      setDeleteTarget(role);
-                    }}
-                  >
-                    Xóa role
-                  </DropdownMenuItem>
+                      disabled={isAdmin}
+                      className={isAdmin ? 'cursor-not-allowed opacity-60' : ''}
+                      onClick={() => {
+                        if (isAdmin) return;
+                        setDeleteTarget(role);
+                      }}
+                    >
+                      Delete role
+                    </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -190,7 +190,7 @@ export const RolesTable: React.FC<RolesTableProps> = ({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center text-sm text-muted-foreground">
-                  Không có role nào.
+                  No role
                 </TableCell>
               </TableRow>
             )}
@@ -206,14 +206,13 @@ export const RolesTable: React.FC<RolesTableProps> = ({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xóa role?</AlertDialogTitle>
+            <AlertDialogTitle>Delete role?</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn sắp xóa role <span className="font-semibold">{deleteTarget?.name}</span>. 
-              Hành động này không thể hoàn tác, nên suy nghĩ cho kỹ (ít nhất là 0.5 giây).
+              Are you sure to delete account <span className="font-semibold">{deleteTarget?.name}</span>?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (deleteTarget) {
@@ -223,7 +222,7 @@ export const RolesTable: React.FC<RolesTableProps> = ({
               }}
               className='text-black '
             >
-              Xóa
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

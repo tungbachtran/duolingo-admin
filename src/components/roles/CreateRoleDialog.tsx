@@ -31,13 +31,13 @@ export const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
     }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Thêm role mới</DialogTitle>
+          <DialogTitle>Add a new role</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Tên role</label>
+            <label className="text-sm font-medium">Role name</label>
             <Input
-              placeholder="Ví dụ: Student, Moderator..."
+              placeholder="Example: Student, Moderator..."
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={isLoading}
@@ -46,10 +46,10 @@ export const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-            Hủy
+            Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!name.trim() || isLoading}>
-            {isLoading ? 'Đang tạo...' : 'Tạo'}
+          <Button className='text-black' onClick={handleSubmit} disabled={!name.trim() || isLoading}>
+            {isLoading ? 'Creating...' : 'Create'}
           </Button>
         </DialogFooter>
       </DialogContent>

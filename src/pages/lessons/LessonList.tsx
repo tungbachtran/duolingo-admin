@@ -75,6 +75,13 @@ export const LessonList = () => {
       ),
     },
     {
+      accessorKey: "description",
+      header: "Experience point",
+      cell: ({ row }) => (
+        <div className="max-w-md truncate">{row.original.experiencePoint}</div>
+      ),
+    },
+    {
       accessorKey: "thumbnail",
       header: "Thumbnail",
       cell: ({ row }) =>

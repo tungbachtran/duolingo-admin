@@ -95,7 +95,7 @@ export const RoleManagementPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Quản lý Roles</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Role management</h1>
 
         </div>
         <div className="flex items-center gap-2">
@@ -107,23 +107,23 @@ export const RoleManagementPage: React.FC = () => {
               disabled={isSavingPermissions || editableRoles.length === 0}
             >
               {isSavingPermissions && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Lưu tất cả permissions
+              Save all permissions
             </Button>
           )}
-          {user?.roleId.permissions.includes('role.create') && (<Button className='text-black rounde-sm' onClick={() => setCreateDialogOpen(true)}>Thêm role</Button>)}
+          {user?.roleId.permissions.includes('role.create') && (<Button className='text-black rounde-sm' onClick={() => setCreateDialogOpen(true)}>Add a new role</Button>)}
         </div>
       </div>
 
       {isLoading && (
         <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Đang tải roles...
+          Loading roles...
         </div>
       )}
 
       {isError && (
         <div className="text-sm text-red-500">
-          Tải roles lỗi. Kiểm tra lại API /api/roles xem có sống không.
+          Cannot get roles
         </div>
       )}
 
@@ -133,7 +133,7 @@ export const RoleManagementPage: React.FC = () => {
           onChangeRoleName={handleChangeRoleName}
           onDeleteRole={handleDeleteRole}
           onOpenEditPermissions={handleOpenEditPermissions}
-          user = {user}
+          user={user}
         />
       )}
 

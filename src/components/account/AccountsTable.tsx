@@ -85,7 +85,7 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
             },
             {
                 accessorKey: 'isActive',
-                header: 'Trạng thái',
+                header: 'Status',
                 cell: ({ row }) => {
                     const isActive = row.original.isActive;
                     return (
@@ -93,20 +93,20 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
 
                             className="text-xs"
                         >
-                            {isActive ? 'Đang hoạt động' : 'Không hoạt động'}
+                            {isActive ? 'Active' : 'Inactive'}
                         </Badge>
                     );
                 },
             },
             {
                 id: 'lastActiveAt',
-                header: 'Hoạt động cuối',
+                header: 'Last Active',
                 cell: ({ row }) => {
                     const last = row.original.lastActiveAt;
                     if (!last) {
                         return (
                             <span className="text-xs text-muted-foreground">
-                                Chưa có dữ liệu
+                                No data
                             </span>
                         );
                     }
@@ -140,7 +140,7 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
                                 <DropdownMenuContent align="end">
                                     {user?.roleId.permissions.includes('account.edit') && (
                                         <DropdownMenuItem onClick={() => onEdit(account)}>
-                                            Chỉnh sửa
+                                            Edit
                                         </DropdownMenuItem>
                                     )}
                                     {user?.roleId.permissions.includes('account.delete') && (
@@ -148,7 +148,7 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
                                             onClick={() => setDeleteTarget(account)}
                                             className="text-red-600 focus:text-red-600"
                                         >
-                                            Xóa
+                                            Delete
                                         </DropdownMenuItem>
                                     )}
                                 </DropdownMenuContent>
@@ -208,7 +208,7 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
                                     colSpan={columns.length}
                                     className="h-24 text-center text-sm text-muted-foreground"
                                 >
-                                    Không có tài khoản nào.
+                                    No accounts
                                 </TableCell>
                             </TableRow>
                         )}
@@ -224,15 +224,15 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
             >
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Xóa tài khoản?</AlertDialogTitle>
+                        <AlertDialogTitle>Delete account?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Bạn có chắc muốn xóa tài khoản{' '}
+                            Are you sure to delete{' '}
                             <span className="font-semibold">{deleteTarget?.email}</span>?
 
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Hủy</AlertDialogCancel>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={() => {
                                 if (deleteTarget) {
@@ -242,7 +242,7 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
                             }}
                             className='text-black'
                         >
-                            Xóa
+                            Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
