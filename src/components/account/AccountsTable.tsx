@@ -30,17 +30,20 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { MoreHorizontal } from 'lucide-react';
+import type { User } from '@/types/user.types';
 
 interface AccountsTableProps {
     data: Account[];
     onEdit: (account: Account) => void;
     onDelete: (id: string) => void;
+    user?: User
 }
 
 export const AccountsTable: React.FC<AccountsTableProps> = ({
     data,
     onEdit,
     onDelete,
+    user
 }) => {
     const [deleteTarget, setDeleteTarget] = React.useState<Account | null>(null);
 
@@ -51,7 +54,7 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
                 header: 'User',
                 cell: ({ row }) => {
                     const account = row.original;
-        
+
 
                     return (
                         <div className="flex items-center gap-3">
@@ -87,7 +90,7 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
                     const isActive = row.original.isActive;
                     return (
                         <Badge
-                         
+
                             className="text-xs"
                         >
                             {isActive ? 'Đang hoạt động' : 'Không hoạt động'}
@@ -135,15 +138,19 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => onEdit(account)}>
-                                        Chỉnh sửa
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() => setDeleteTarget(account)}
-                                        className="text-red-600 focus:text-red-600"
-                                    >
-                                        Xóa
-                                    </DropdownMenuItem>
+                                    {user?.roleId.permissions.includes('account.edit') && (
+                                        <DropdownMenuItem onClick={() => onEdit(account)}>
+                                            Chỉnh sửa
+                                        </DropdownMenuItem>
+                                    )}
+                                    {user?.roleId.permissions.includes('account.delete') && (
+                                        <DropdownMenuItem
+                                            onClick={() => setDeleteTarget(account)}
+                                            className="text-red-600 focus:text-red-600"
+                                        >
+                                            Xóa
+                                        </DropdownMenuItem>
+                                    )}
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
@@ -219,9 +226,9 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Xóa tài khoản?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Bạn sắp xóa tài khoản{' '}
-                            <span className="font-semibold">{deleteTarget?.email}</span>.
-                            Không có nút hoàn tác, nên đừng lỡ tay khi đang buồn đời.
+                            Bạn có chắc muốn xóa tài khoản{' '}
+                            <span className="font-semibold">{deleteTarget?.email}</span>?
+
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -233,6 +240,7 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
                                 }
                                 setDeleteTarget(null);
                             }}
+                            className='text-black'
                         >
                             Xóa
                         </AlertDialogAction>

@@ -18,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+import { userApi } from "@/api/user.api";
 
 export const LessonList = () => {
   const navigate = useNavigate();
@@ -31,7 +33,7 @@ export const LessonList = () => {
 
   // Fetch courses for filter
   const { data: coursesData } = useCourses({ page: 1, pageSize: 100 });
-
+  const { data: user } = useQuery({ queryKey: ['userProfile'], queryFn: userApi.getUserProfile, gcTime: 0 })
   // Fetch units based on selected course
   const { data: unitsData } = useUnits(selectedCourseId);
 
@@ -98,31 +100,35 @@ export const LessonList = () => {
           >
             <Eye className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setSelectedLesson(row.original);
-              setIsDialogOpen(true);
-            }}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {user?.roleId.permissions.includes('lesson.edit') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedLesson(row.original);
+                setIsDialogOpen(true);
+              }}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       ),
     },
   ];
 
- 
+
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Lessons</h1>
-        <Button className="text-black" onClick={() => setIsDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Lesson
-        </Button>
+        {user?.roleId.permissions.includes('lesson.create') && (
+          <Button className="text-black" onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Lesson
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center gap-4">
@@ -176,7 +182,7 @@ export const LessonList = () => {
         }}
         lesson={selectedLesson}
         courseId={selectedCourseId}
-      
+
       />
     </div>
   );

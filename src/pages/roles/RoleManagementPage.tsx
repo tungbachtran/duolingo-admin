@@ -8,6 +8,8 @@ import { CreateRoleDialog } from '@/components/roles/CreateRoleDialog';
 import { EditPermissionsDialog } from '@/components/roles/EditPermissionsDialog';
 import { Loader2 } from 'lucide-react';
 import type { Permission, Role, RoleSetupItem } from '@/types/role';
+import { useQuery } from '@tanstack/react-query';
+import { userApi } from '@/api/user.api';
 
 export const RoleManagementPage: React.FC = () => {
   const { data: rolesData, isLoading, isError } = useRoles();
@@ -21,7 +23,7 @@ export const RoleManagementPage: React.FC = () => {
 
   // local state để chỉnh sửa permissions trước khi submit toàn bộ
   const [editableRoles, setEditableRoles] = React.useState<Role[]>([]);
-
+  const { data: user } = useQuery({ queryKey: ['userProfile'], queryFn: userApi.getUserProfile, gcTime: 0 })
   React.useEffect(() => {
     if (rolesData) {
       setEditableRoles(rolesData);
@@ -32,6 +34,7 @@ export const RoleManagementPage: React.FC = () => {
     // Gửi patch
     updateRoleNameMutation.mutate({ id, data: { name } });
   };
+
 
   const handleDeleteRole = (id: string) => {
     deleteRoleMutation.mutate(id);
@@ -48,9 +51,9 @@ export const RoleManagementPage: React.FC = () => {
       prev.map((r) =>
         r._id === roleId
           ? {
-              ...r,
-              permissions,
-            }
+            ...r,
+            permissions,
+          }
           : r
       )
     );
@@ -59,23 +62,23 @@ export const RoleManagementPage: React.FC = () => {
     setSelectedRole((prev) =>
       prev && prev._id === roleId
         ? {
-            ...prev,
-            permissions,
-          }
+          ...prev,
+          permissions,
+        }
         : prev
     );
   };
 
   const allPermissions: Permission[] = React.useMemo(() => {
     const set = new Set<Permission>();
-  
+
     (rolesData ?? []).forEach((role) => {
       (role.permissions ?? []).forEach((p) => set.add(p));
     });
-  
+
     return Array.from(set).sort();
   }, [rolesData]);
-  
+
 
   const handleSaveAllPermissions = () => {
     const payload: RoleSetupItem[] = editableRoles.map((role) => ({
@@ -93,19 +96,21 @@ export const RoleManagementPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Quản lý Roles</h1>
-         
+
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            className='text-black rounde-sm'
-            onClick={handleSaveAllPermissions}
-            disabled={isSavingPermissions || editableRoles.length === 0}
-          >
-            {isSavingPermissions && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Lưu tất cả permissions
-          </Button>
-          <Button className='text-black rounde-sm' onClick={() => setCreateDialogOpen(true)}>Thêm role</Button>
+          {user?.roleId.permissions.includes('role.setup') && (
+            <Button
+              variant="outline"
+              className='text-black rounde-sm'
+              onClick={handleSaveAllPermissions}
+              disabled={isSavingPermissions || editableRoles.length === 0}
+            >
+              {isSavingPermissions && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Lưu tất cả permissions
+            </Button>
+          )}
+          {user?.roleId.permissions.includes('role.create') && (<Button className='text-black rounde-sm' onClick={() => setCreateDialogOpen(true)}>Thêm role</Button>)}
         </div>
       </div>
 
@@ -128,6 +133,7 @@ export const RoleManagementPage: React.FC = () => {
           onChangeRoleName={handleChangeRoleName}
           onDeleteRole={handleDeleteRole}
           onOpenEditPermissions={handleOpenEditPermissions}
+          user = {user}
         />
       )}
 

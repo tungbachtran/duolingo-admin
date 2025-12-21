@@ -19,6 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select';
+import { useQuery } from '@tanstack/react-query';
+import { userApi } from '@/api/user.api';
 
 const getQuestionTypeLabel = (type: QuestionType) => {
   const labels = {
@@ -40,7 +42,7 @@ export const QuestionList = () => {
   const [selectedLessonId, setSelectedLessonId] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
-
+  const { data: user } = useQuery({ queryKey: ['userProfile'], queryFn: userApi.getUserProfile, gcTime: 0 })
   // Fetch courses for filter
   const { data: coursesData } = useCourses({ page: 1, pageSize: 100 });
 
@@ -98,7 +100,7 @@ export const QuestionList = () => {
       cell: ({ row }) => {
         const question = row.original;
         let preview = '';
-        
+
         if (question.typeQuestion === QuestionType.MULTIPLE_CHOICE) {
           preview = question.correctAnswer || 'N/A';
         } else if (question.typeQuestion === QuestionType.GAP) {
@@ -108,7 +110,7 @@ export const QuestionList = () => {
         } else if (question.typeQuestion === QuestionType.MATCHING) {
           preview = `${question.leftText?.length || 0} pairs`;
         }
-        
+
         return <div className="max-w-xs truncate">{preview}</div>;
       },
     },
@@ -124,22 +126,24 @@ export const QuestionList = () => {
           >
             <Eye className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setSelectedQuestion(row.original);
-              setIsDialogOpen(true);
-            }}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {user?.roleId.permissions.includes('question.edit') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedQuestion(row.original);
+                setIsDialogOpen(true);
+              }}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       ),
     },
   ];
 
-  
+
 
   return (
     <div className="space-y-4">
@@ -203,7 +207,7 @@ export const QuestionList = () => {
         columns={columns}
         data={data?.data || []}
         pagination={data?.pagination}
-    
+
         isLoading={isLoading}
       />
 

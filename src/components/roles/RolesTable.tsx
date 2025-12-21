@@ -22,12 +22,15 @@ import {
 import { MoreHorizontal } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import type { Role } from '@/types/role';
+import { getPermissionLabel } from './utils';
+import type { User } from '@/types/user.types';
 
 interface RolesTableProps {
   roles: Role[];
   onChangeRoleName: (id: string, name: string) => void;
   onDeleteRole: (id: string) => void;
   onOpenEditPermissions: (role: Role) => void;
+  user?:User
 }
 
 export const RolesTable: React.FC<RolesTableProps> = ({
@@ -35,6 +38,7 @@ export const RolesTable: React.FC<RolesTableProps> = ({
   onChangeRoleName,
   onDeleteRole,
   onOpenEditPermissions,
+  user
 }) => {
   // state confirm delete
   const [deleteTarget, setDeleteTarget] = React.useState<Role | null>(null);
@@ -91,7 +95,7 @@ export const RolesTable: React.FC<RolesTableProps> = ({
             <div className="flex flex-wrap items-center gap-1">
               {preview.map((p) => (
                 <Badge key={p} variant="secondary" className="font-mono text-[10px]">
-                  {p}
+                  {getPermissionLabel(p)}
                 </Badge>
               ))}
               {extra > 0 && (
@@ -122,10 +126,13 @@ export const RolesTable: React.FC<RolesTableProps> = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => onOpenEditPermissions(role)}>
+                  {user?.roleId.permissions.includes('role.setup') && (
+                    <DropdownMenuItem onClick={() => onOpenEditPermissions(role)}>
                     Chỉnh sửa permissions
                   </DropdownMenuItem>
-                  <DropdownMenuItem
+                  )}
+                  {user?.roleId.permissions.includes('role.delete') && (
+                    <DropdownMenuItem
                     disabled={isAdmin}
                     className={isAdmin ? 'cursor-not-allowed opacity-60' : ''}
                     onClick={() => {
@@ -135,6 +142,7 @@ export const RolesTable: React.FC<RolesTableProps> = ({
                   >
                     Xóa role
                   </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -213,6 +221,7 @@ export const RolesTable: React.FC<RolesTableProps> = ({
                 }
                 setDeleteTarget(null);
               }}
+              className='text-black '
             >
               Xóa
             </AlertDialogAction>

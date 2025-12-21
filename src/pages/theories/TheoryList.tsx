@@ -18,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select';
+import { useQuery } from '@tanstack/react-query';
+import { userApi } from '@/api/user.api';
 
 const getTheoryTypeLabel = (type: TheoryType) => {
   const labels = {
@@ -42,7 +44,7 @@ export const TheoryList = () => {
 
   // Fetch units based on selected course
   const { data: unitsData } = useUnits(selectedCourseId);
-
+  const { data: user } = useQuery({ queryKey: ['userProfile'], queryFn: userApi.getUserProfile, gcTime: 0 })
   // Set default course on load
   useEffect(() => {
     if (coursesData?.data && coursesData.data.length > 0 && !selectedCourseId) {
@@ -60,7 +62,7 @@ export const TheoryList = () => {
   }, [unitsData]);
 
   const { data, isLoading } = useTheories(selectedUnitId);
-  
+
   const deleteMutation = useDeleteTheory();
 
   const handleDelete = async () => {
@@ -91,7 +93,7 @@ export const TheoryList = () => {
       cell: ({ row }) => {
         const theory = row.original;
         let content = '';
-        
+
         if (theory.typeTheory === TheoryType.GRAMMAR) {
           content = theory.title || 'N/A';
         } else if (theory.typeTheory === TheoryType.PHRASE) {
@@ -99,7 +101,7 @@ export const TheoryList = () => {
         } else if (theory.typeTheory === TheoryType.FLASHCARD) {
           content = theory.term || 'N/A';
         }
-        
+
         return <div className="max-w-md truncate">{content}</div>;
       },
     },
@@ -115,23 +117,27 @@ export const TheoryList = () => {
       header: 'Actions',
       cell: ({ row }) => (
         <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setSelectedTheory(row.original);
-              setIsDialogOpen(true);
-            }}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setDeleteId(row.original._id)}
-          >
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </Button>
+          {user?.roleId.permissions.includes('theory.edit') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedTheory(row.original);
+                setIsDialogOpen(true);
+              }}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
+          {user?.roleId.permissions.includes('theory.delete') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setDeleteId(row.original._id)}
+            >
+              <Trash2 className="h-4 w-4 text-red-500" />
+            </Button>
+          )}
         </div>
       ),
     },
@@ -199,7 +205,7 @@ export const TheoryList = () => {
           if (!open) setSelectedTheory(null);
         }}
         theory={selectedTheory}
-        courseId = {selectedCourseId}
+        courseId={selectedCourseId}
       />
 
       <ConfirmDialog

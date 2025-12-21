@@ -8,6 +8,8 @@ import { Loader2 } from 'lucide-react';
 import type { Account } from '@/types/account';
 import { AccountsTable } from '@/components/account/AccountsTable';
 import { AccountFormDialog } from '@/components/account/AccountFormDialog';
+import { useQuery } from '@tanstack/react-query';
+import { userApi } from '@/api/user.api';
 
 export const AccountManagementPage: React.FC = () => {
   const [page, setPage] = React.useState(1);
@@ -19,7 +21,7 @@ export const AccountManagementPage: React.FC = () => {
   const [formOpen, setFormOpen] = React.useState(false);
   const [formMode, setFormMode] = React.useState<'create' | 'edit'>('create');
   const [selectedAccount, setSelectedAccount] = React.useState<Account | null>(null);
-
+  const { data: user } = useQuery({ queryKey: ['userProfile'], queryFn: userApi.getUserProfile, gcTime: 0 })
   const accounts = data?.data ?? [];
   const pagination = data?.pagination;
 
@@ -47,9 +49,7 @@ export const AccountManagementPage: React.FC = () => {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Quản lý tài khoản</h1>
-          <p className="text-sm text-muted-foreground">
-            Danh sách user, phân quyền, dọn rác những tài khoản tạo xong rồi quên.
-          </p>
+
         </div>
         <div className="flex items-center gap-2">
           {isFetching && !isLoading && (
@@ -58,7 +58,7 @@ export const AccountManagementPage: React.FC = () => {
               Đang cập nhật...
             </span>
           )}
-          <Button onClick={handleCreate}>Tạo tài khoản</Button>
+          {user?.roleId.permissions.includes('account.create') && (<Button className='text-black border-2 border-black' onClick={handleCreate}>Tạo tài khoản</Button>)}
         </div>
       </div>
 
@@ -71,18 +71,18 @@ export const AccountManagementPage: React.FC = () => {
 
       {isError && (
         <div className="text-sm text-red-500">
-          Lỗi khi tải accounts. Kiểm tra API <code>/api/accounts</code> xem có chạy không.
+          Lỗi khi tải accounts. Vui lòng Kiểm tra API <code>/api/accounts</code>.
         </div>
       )}
 
       {!isLoading && !isError && (
         <>
-          <AccountsTable data={accounts} onEdit={handleEdit} onDelete={handleDelete} />
+          <AccountsTable data={accounts} onEdit={handleEdit} onDelete={handleDelete} user = {user} />
 
           {pagination && (
             <div className="flex items-center justify-between pt-4 text-xs text-muted-foreground">
               <div>
-                Trang {pagination.page} / {pagination.totalPages}  
+                Trang {pagination.page} / {pagination.totalPages}
                 {' • '}Tổng {pagination.totalRecords} tài khoản
               </div>
               <div className="flex items-center gap-2">

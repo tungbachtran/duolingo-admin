@@ -211,6 +211,7 @@ export const AccountFormDialog: React.FC<AccountFormDialogProps> = ({
           </Button>
           <Button
             onClick={handleSubmit}
+            className='text-black'
             disabled={
               isSubmitting ||
               !email.trim() ||

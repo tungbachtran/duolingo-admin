@@ -17,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+import { userApi } from "@/api/user.api";
 
 export const UnitList = () => {
   const navigate = useNavigate();
@@ -28,7 +30,7 @@ export const UnitList = () => {
 
   // Fetch courses for filter
   const { data: coursesData } = useCourses({ page: 1, pageSize: 100 });
-
+  const { data: user } = useQuery({ queryKey: ['userProfile'], queryFn: userApi.getUserProfile, gcTime: 0 })
   // Set default course on load
   useEffect(() => {
     if (coursesData?.data && coursesData.data.length > 0 && !selectedCourseId) {
@@ -83,16 +85,18 @@ export const UnitList = () => {
           >
             <Eye className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setSelectedUnit(row.original);
-              setIsDialogOpen(true);
-            }}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {user?.roleId.permissions.includes('unit.edit') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedUnit(row.original);
+                setIsDialogOpen(true);
+              }}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       ),
     },
@@ -109,10 +113,12 @@ export const UnitList = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Units</h1>
-        <Button className="text-black" onClick={() => setIsDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Unit
-        </Button>
+        {user?.roleId.permissions.includes('unit.create') && (
+          <Button className="text-black" onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Unit
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center gap-4">

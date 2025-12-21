@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Button } from '../../components/ui/button';
 import { DataTable } from '../../components/common/DataTable';
-import { useCourses} from '../../hooks/useCourses';
+import { useCourses } from '../../hooks/useCourses';
 import { type Course } from '../../types/course.types';
 import { Plus, Pencil, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CourseDialog } from '@/components/forms/CourseDialog';
 import { Input } from '../../components/ui/input';
 import { Badge } from '../../components/ui/badge';
+import { useQuery } from '@tanstack/react-query';
+import { userApi } from '@/api/user.api';
 
 export const CourseList = () => {
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ export const CourseList = () => {
 
   const { data, isLoading } = useCourses({ page, pageSize, search });
 
-
+  const { data: user } = useQuery({ queryKey: ['userProfile'], queryFn: userApi.getUserProfile, gcTime: 0 })
   const columns: ColumnDef<Course>[] = [
     {
       accessorKey: 'displayOrder',
@@ -62,7 +64,7 @@ export const CourseList = () => {
           >
             <Eye className="h-4 w-4" />
           </Button>
-          <Button
+          {user?.roleId.permissions.includes('course.edit') && (<Button
             variant="ghost"
             size="sm"
             onClick={() => {
@@ -71,7 +73,7 @@ export const CourseList = () => {
             }}
           >
             <Pencil className="h-4 w-4" />
-          </Button>
+          </Button>)}
         </div>
       ),
     },
@@ -85,10 +87,10 @@ export const CourseList = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold ">Courses</h1>
-        <Button className='text-black' onClick={() => setIsDialogOpen(true)}>
+        {user?.roleId.permissions.includes('course.create') && (<Button className='text-black' onClick={() => setIsDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4 " />
           Add Course
-        </Button>
+        </Button>)}
       </div>
 
       <div className="flex items-center gap-4">

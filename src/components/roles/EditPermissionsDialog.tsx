@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import type { Permission, Role } from '@/types/role';
+import { getPermissionLabel } from './utils';
 
 interface EditPermissionsDialogProps {
   open: boolean;
@@ -62,7 +63,7 @@ export const EditPermissionsDialog: React.FC<EditPermissionsDialogProps> = ({
                       onChange={() => handleTogglePermission(permission)}
                       className='w-5 h-5'
                     />
-                    <span className="font-mono text-xs ">{permission}</span>
+                    {getPermissionLabel(permission)}
                   </label>
                 );
               })}
