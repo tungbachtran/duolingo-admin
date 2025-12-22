@@ -37,7 +37,7 @@ import {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{cancelText}</AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirm}>{confirmText}</AlertDialogAction>
+            <AlertDialogAction className='text-black' onClick={onConfirm}>{confirmText}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
