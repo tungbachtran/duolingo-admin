@@ -138,7 +138,7 @@ export const AccountsTable: React.FC<AccountsTableProps> = ({
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    {user?.roleId.permissions.includes('account.edit') && (
+                                    {user?.roleId.permissions.includes('account.update') && (
                                         <DropdownMenuItem onClick={() => onEdit(account)}>
                                             Edit
                                         </DropdownMenuItem>
